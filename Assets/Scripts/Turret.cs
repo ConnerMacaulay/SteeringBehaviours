@@ -3,8 +3,11 @@ using System.Collections;
 
 public class Turret : MonoBehaviour
 {
-    public GameObject bullet;
-    public float fireRate = 1.0f;
+
+    public GameObject[] agentOBJ;
+    public GameObject target;
+   
+   
     public float maxSpeed = 50.0f;
     public float maxSteering = 1.0f;
     public float distance;
@@ -14,7 +17,7 @@ public class Turret : MonoBehaviour
     public Vector2 desiredVelocity;
     public Vector2 steeringVelocity;
     public Vector2 randomVelocity;
-     
+         
 
 
     public Texture2D cursorTexture;
@@ -34,6 +37,8 @@ public class Turret : MonoBehaviour
     // Use this for initialization
     private void Start()
     {
+        target = GameObject.FindGameObjectWithTag("HealthKit");
+        
         rigidBody2D = GetComponent<Rigidbody2D>();
     }
 
@@ -56,9 +61,12 @@ public class Turret : MonoBehaviour
             randomVelocity = Random.insideUnitCircle.normalized;
         }
 
-        fireRate -= Time.deltaTime;
+        
 
+        NearestAgent();
         SetDirection();
+
+       
     }
 
     #region Helper functions
@@ -68,7 +76,7 @@ public class Turret : MonoBehaviour
     /// <returns>the mouse position in 2d space</returns>
     protected Vector2 GetMousePosition()
     {
-        Vector3 temp = GameObject.FindGameObjectWithTag("Agent").transform.position;
+        Vector3 temp = target.transform.position;
         return new Vector2(temp.x, temp.x);
     }
 
@@ -84,16 +92,11 @@ public class Turret : MonoBehaviour
             transform.up = new Vector3(rigidBody2D.velocity.x, rigidBody2D.velocity.y, 0.0f);
         }
 
-        Vector3 vectorToTarget = GameObject.FindGameObjectWithTag("Agent").transform.position - transform.position;
+        Vector3 vectorToTarget = target.transform.position - transform.position;
         float angle = Mathf.Atan2(vectorToTarget.y, vectorToTarget.x) * Mathf.Rad2Deg - 90;
         Quaternion q = Quaternion.AngleAxis(angle, Vector3.forward);
         transform.rotation = Quaternion.Slerp(transform.rotation, q, Time.deltaTime * 50);
 
-        if (fireRate <= 0)
-        {
-
-            fireRate = 50;
-        }
     }
 
 
@@ -265,4 +268,23 @@ public class Turret : MonoBehaviour
         rigidBody2D.velocity = currentVelocity;
     }
     #endregion
+
+    public void NearestAgent()
+    {
+        agentOBJ = GameObject.FindGameObjectsWithTag("Agent");
+
+
+        float dist = Mathf.Infinity;
+        foreach (GameObject agent in agentOBJ)
+        {
+            Vector2 diff = transform.position - agent.transform.position;
+            float curDis = diff.sqrMagnitude;
+            if (curDis < dist)
+            {
+                target = agent;
+                dist = curDis;
+            }
+           
+        }
+    }
 }
