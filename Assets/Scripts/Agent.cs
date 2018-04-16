@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -6,22 +7,28 @@ using System.Collections.Generic;
 public class Agent : MonoBehaviour
 {
     public GameObject utility;
-    public float distanceUtilityScore;
-    public float healthUtilityScore;
+    public float eatingUtilityScore;
+    public float sleepUtilityScore;
+    public float bordemUtilityScore;
+    public float hygineUtilityScore;
     public UtilityAI utilityScript;
-    public string targetTag = "Cover";
     public float targetDistance;
-    public GameObject[] coverOBJ;
     public GameObject targetCover = null;
     public GameObject targetMedkit = null;
     public GameObject target = null;
-    public float health = 100;
     public float steepAgent;
     public float pModAgent = 5.5f;
     public float AIDelay = 0;
+    public int action;
+    public float max;
+
     public float [] utilityComp;
-    public float action = 0;
-    public float underFireUtility;
+    public string[] targets;
+
+    public float hunger;
+    public float hygine;
+    public float energy;
+    public float bordem;
 
     public float maxSpeed = 50.0f;
     public float maxSteering = 1.0f;
@@ -49,8 +56,11 @@ public class Agent : MonoBehaviour
     // Use this for initialization
     private void Start()
     {
+        hunger = Random.Range(0, 10);
+        bordem = Random.Range(0, 10);
+        energy = Random.Range(0, 10);
+        hygine = Random.Range(0, 10);
 
-        target = GameObject.FindGameObjectWithTag("Turret");
         utility = GameObject.Find("_Utility");
         utilityScript = utility.GetComponent<UtilityAI>();
         rigidBody = GetComponent<Rigidbody>();
@@ -65,6 +75,41 @@ public class Agent : MonoBehaviour
     // Update is called once per game frame
     private void Update()
     {
+        utilityComp[0] = eatingUtilityScore;
+        utilityComp[1] = sleepUtilityScore;
+        utilityComp[2] = bordemUtilityScore;
+        utilityComp[3] = hygineUtilityScore;
+
+        targets[0] = "Food";
+        targets[1] = "Sleep";
+        targets[2] = "Couch";
+        targets[3] = "Shower";
+
+        hunger = hunger - 0.1f;
+        energy = energy - 0.1f;
+        bordem = bordem - 0.1f;
+        hygine = hygine - 0.1f;
+
+        if (hunger < 0)
+        {
+            hunger = 10f;
+        }
+
+        if (energy < 0)
+        {
+            energy = 10f;
+        }
+
+        if (bordem < 0)
+        {
+            bordem = 10f;
+        }
+
+        if (hygine < 0)
+        {
+            hygine = 10f;
+        }
+
         if (delayTimer > 0) {
             delayTimer -= Time.deltaTime;
         }
@@ -74,19 +119,14 @@ public class Agent : MonoBehaviour
             randomVelocity = Random.insideUnitCircle.normalized;
         }
 
-        if(health <= 0)
-        {
-            //Destroy(gameObject);
-        }
-
         AIDelay -= Time.deltaTime;
         if (AIDelay <= 0)
         {
-            action = 0;
+            //action = 0;
             SetDirection();
-            NearestCover();
             SetAction();
             AIDelay = 0.25f;
+            print("update");
          }
 
     }
@@ -285,96 +325,75 @@ public class Agent : MonoBehaviour
     }
     #endregion
 
-    public void DistanceUtility()
+    public void EatingUtility()
     {
-        utilityScript.floatMeasure = targetDistance;
+        /*utilityScript.floatMeasure = hunger/10;
         utilityScript.pMod = pModAgent;
         utilityScript.ExponentialDecCalculation();
-        distanceUtilityScore = utilityScript.utilityExp;
-        if (distanceUtilityScore > 10)
+        eatingUtilityScore = utilityScript.utilityExp;
+        if (eatingUtilityScore > 10)
         {
-            distanceUtilityScore = 10;
+            eatingUtilityScore = 10;
         }
-        else if (distanceUtilityScore < 0.001)
+        else if (eatingUtilityScore < 0.001)
         {
-            distanceUtilityScore = 0.001f*2;
-        }
-
-
+            eatingUtilityScore = 0.001f*2;
+        }*/
+        eatingUtilityScore = hunger;
+        
     }
 
-    public void HealthUtility()
+    public void SleepUtility()
     {
-        utilityScript.floatMeasure = health/10;
+        /*utilityScript.floatMeasure = energy/10;
         utilityScript.pMod = pModAgent;
         utilityScript.steep = 2;
         utilityScript.SigmoidCalculation();
-        healthUtilityScore = utilityScript.utilitySig;
-        if (healthUtilityScore < 0.002)
+        sleepUtilityScore = utilityScript.utilitySig;
+        if (sleepUtilityScore < 0.002)
         {
-            healthUtilityScore = 0.001f;
+            sleepUtilityScore = 0.001f;
         }
-
+        */
+        sleepUtilityScore = energy;
     }
 
-    public void NearestCover()
+    public void CouchUtility()
     {
-        coverOBJ = GameObject.FindGameObjectsWithTag("Cover");
+        bordemUtilityScore = bordem;
+    }
 
-        
-        float dist = Mathf.Infinity;
-        foreach (GameObject cover in coverOBJ)
-        {
-           Vector2 diff = transform.position - cover.transform.position;
-            float curDis = diff.sqrMagnitude;
-            if (curDis < dist)
-            {
-                targetCover = cover;
-                dist = curDis;
-            }
-        }
+    public void ShowerUtility()
+    {
+        hygineUtilityScore = hygine;
     }
 
     public void OnCollisionEnter(Collision col)
     {
-        if(col.gameObject.tag== "Bullet")
+        if(col.gameObject.tag== "Food")
         {
-            health -= 10;
-        }
-
-        if(col.gameObject.tag == "HealthKit")
-        {
-            health = 100;
+            print(col.gameObject.tag);
         }
     }
 
     public void SetAction()
     {
-        DistanceUtility();
-        HealthUtility();
+        EatingUtility();
+        SleepUtility();
+        CouchUtility();
+        ShowerUtility();
 
-        utilityComp[0] = distanceUtilityScore;
-        utilityComp[1] = healthUtilityScore;
-        //utilityComp[2] = underFireUtility;
-
-
-        foreach (float utility in utilityComp)
+        for (int i=0; i < utilityComp.Length; i++)
         {
-            if (utility > action)
+            if (utilityComp[i] > max)
             {
-                action = utility;
-            }
+                max = utilityComp[i];
+                action = i;
+                print(i);
+            }  
         }
-
-        if (action == utilityComp[0])
-        {
-            target = targetCover;
-           
-        }
-        else if (action == utilityComp[1])
-        {
-            target = GameObject.FindGameObjectWithTag("HealthKit");
-          
-        }
+        max = 0;
+        //pri ;(action);
+        target = GameObject.FindGameObjectWithTag(targets[action]);
     }
 }
