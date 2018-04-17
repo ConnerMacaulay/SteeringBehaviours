@@ -85,10 +85,10 @@ public class Agent : MonoBehaviour
         targets[2] = "Couch";
         targets[3] = "Shower";
 
-        hunger = hunger - 0.1f;
-        energy = energy - 0.1f;
-        bordem = bordem - 0.1f;
-        hygine = hygine - 0.1f;
+        hunger = hunger - 0.01f;
+        energy = energy - 0.01f;
+        bordem = bordem - 0.01f;
+        hygine = hygine - 0.01f;
 
         if (hunger < 0)
         {
