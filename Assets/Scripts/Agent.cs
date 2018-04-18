@@ -393,7 +393,6 @@ public class Agent : MonoBehaviour
             }  
         }
         max = 0;
-        //pri ;(action);
         target = GameObject.FindGameObjectWithTag(targets[action]);
     }
 }
