@@ -9,8 +9,8 @@ public class Agent : MonoBehaviour
     public GameObject utility;
     public float eatingUtilityScore;
     public float sleepUtilityScore;
-    public float bordemUtilityScore;
-    public float hygineUtilityScore;
+    public float boredomUtilityScore;
+    public float hygieneUtilityScore;
     public UtilityAI utilityScript;
     public float targetDistance;
     public GameObject targetCover = null;
@@ -26,9 +26,9 @@ public class Agent : MonoBehaviour
     public string[] targets;
 
     public float hunger;
-    public float hygine;
+    public float hygiene;
     public float energy;
-    public float bordem;
+    public float boredom;
 
     public float maxSpeed = 50.0f;
     public float maxSteering = 1.0f;
@@ -57,9 +57,9 @@ public class Agent : MonoBehaviour
     private void Start()
     {
         hunger = Random.Range(0, 10);
-        bordem = Random.Range(0, 10);
+        boredom = Random.Range(0, 10);
         energy = Random.Range(0, 10);
-        hygine = Random.Range(0, 10);
+        hygiene = Random.Range(0, 10);
 
         utility = GameObject.Find("_Utility");
         utilityScript = utility.GetComponent<UtilityAI>();
@@ -77,8 +77,8 @@ public class Agent : MonoBehaviour
     {
         utilityComp[0] = eatingUtilityScore;
         utilityComp[1] = sleepUtilityScore;
-        utilityComp[2] = bordemUtilityScore;
-        utilityComp[3] = hygineUtilityScore;
+        utilityComp[2] = boredomUtilityScore;
+        utilityComp[3] = hygieneUtilityScore;
 
         targets[0] = "Food";
         targets[1] = "Sleep";
@@ -87,8 +87,8 @@ public class Agent : MonoBehaviour
 
         hunger = hunger - 0.01f;
         energy = energy - 0.01f;
-        bordem = bordem - 0.01f;
-        hygine = hygine - 0.01f;
+        boredom = boredom - 0.01f;
+        hygiene = hygiene - 0.01f;
 
         if (hunger < 0)
         {
@@ -100,14 +100,14 @@ public class Agent : MonoBehaviour
             energy = 10f;
         }
 
-        if (bordem < 0)
+        if (boredom < 0)
         {
-            bordem = 10f;
+            boredom = 10f;
         }
 
-        if (hygine < 0)
+        if (hygiene < 0)
         {
-            hygine = 10f;
+            hygiene = 10f;
         }
 
         if (delayTimer > 0) {
@@ -360,12 +360,12 @@ public class Agent : MonoBehaviour
 
     public void CouchUtility()
     {
-        bordemUtilityScore = bordem;
+        boredomUtilityScore = boredom;
     }
 
     public void ShowerUtility()
     {
-        hygineUtilityScore = hygine;
+        hygieneUtilityScore = hygiene;
     }
 
     public void OnCollisionEnter(Collision col)
