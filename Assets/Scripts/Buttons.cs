@@ -30,6 +30,11 @@ public class Buttons : MonoBehaviour
         SceneManager.LoadScene(5);
     }
 
+    public void Hundred()
+    {
+        SceneManager.LoadScene(6);
+    }
+
     public void Menu()
     {
         SceneManager.LoadScene(0);
